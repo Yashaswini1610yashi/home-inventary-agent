@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class User(BaseModel):
-    model_config = ConfigDict(json_encoders={datetime: lambda dt: dt.isoformat()})
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     
     username: str
     firstname: str
@@ -15,11 +15,12 @@ class User(BaseModel):
 
 
 class Category(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     cat_name: str
 
 
 class Inventory(BaseModel):
-    model_config = ConfigDict(json_encoders={datetime: lambda dt: dt.isoformat()})
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     item_name: str
     cat_name: str

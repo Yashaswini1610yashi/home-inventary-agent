@@ -19,3 +19,4 @@ def save_user(user_data: dict):
 def delete_user(username: str):
     user_repo.delete(username)
     return {"message": "User deleted successfully"}
+

@@ -1,3 +1,4 @@
+# core/sqlite_db.py
 import sqlite3
 
 class SQLiteDB:
@@ -9,27 +10,27 @@ class SQLiteDB:
 
     def connect(self):
         """Create connection to DB"""
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON;")
         return conn
 
     def _init_tables(self):
-        """Create only the inventory table."""
+        """Create the base tables (inventory, users, categories, rooms)."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            # --- Only Inventory Table ---
+            # --- inventory table (minimal set; room_name included for multimodal) ---
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS inventory (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    item_name TEXT,
+                    item_name TEXT PRIMARY KEY,
                     cat_name TEXT,
                     item_status TEXT,
                     comment TEXT,
                     username TEXT,
                     last_updated_at TEXT,
-                    created_at TEXT DEFAULT (datetime('now'))
+                    created_at TEXT DEFAULT (datetime('now')),
+                    room_name TEXT
                 );
             """)
 
@@ -48,6 +49,16 @@ class SQLiteDB:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS categories (
                     cat_name TEXT UNIQUE NOT NULL
+                );
+            """)
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS rooms (
+                    room_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    room_name TEXT NOT NULL UNIQUE,
+                    floor_no INTEGER,
+                    created_at TEXT,
+                    updated_at TEXT
                 );
             """)
 
@@ -76,7 +87,3 @@ class SQLiteDB:
             cursor.execute(query, params)
             row = cursor.fetchone()
             return dict(row) if row else None
-
-
-# Initialize DB with only inventory
-memory_db = SQLiteDB("Home.db")
